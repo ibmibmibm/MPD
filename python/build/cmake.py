@@ -14,7 +14,7 @@ def configure(toolchain, src, build, args=()):
         src,
 
         '-DCMAKE_INSTALL_PREFIX=' + toolchain.install_prefix,
-        '-DCMAKE_BUILD_TYPE=release',
+        '-DCMAKE_BUILD_TYPE=Release',
 
         '-DCMAKE_C_COMPILER=' + toolchain.cc,
         '-DCMAKE_CXX_COMPILER=' + toolchain.cxx,

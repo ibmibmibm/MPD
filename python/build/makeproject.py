@@ -1,4 +1,5 @@
 import subprocess
+from multiprocessing import cpu_count
 
 from build.project import Project
 
@@ -10,7 +11,10 @@ class MakeProject(Project):
         self.install_target = install_target
 
     def get_simultaneous_jobs(self):
-        return 12
+        count = cpu_count()
+        if not count:
+            count = 12
+        return count
 
     def get_make_args(self, toolchain):
         return ['--quiet', '-j' + str(self.get_simultaneous_jobs())]

@@ -43,12 +43,18 @@ class Project:
 
     def is_installed(self, toolchain):
         tarball = self.download(toolchain)
-        installed = os.path.join(toolchain.install_prefix, self.installed)
+        if type(self.installed) is str:
+            installed = [os.path.normpath(os.path.join(toolchain.install_prefix, self.installed))]
+        else:
+            installed = [os.path.normpath(os.path.join(toolchain.install_prefix, x)) for x in self.installed]
         tarball_mtime = os.path.getmtime(tarball)
-        try:
-            return os.path.getmtime(installed) >= tarball_mtime
-        except FileNotFoundError:
-            return False
+        for x in installed:
+            try:
+                if os.path.getmtime(x) >= tarball_mtime:
+                    return True
+            except FileNotFoundError:
+                print(x, 'not founded')
+        return False
 
     def unpack(self, toolchain, out_of_tree=True):
         if out_of_tree:
@@ -62,7 +68,7 @@ class Project:
 
         if self.edits is not None:
             for filename, function in self.edits.items():
-                with open(os.path.join(path, filename), 'r+t') as f:
+                with open(os.path.join(path, filename), 'r+t', encoding='utf8') as f:
                     old_data = f.read()
                     new_data = function(old_data)
                     f.seek(0)

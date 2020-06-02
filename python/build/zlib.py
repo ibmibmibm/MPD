@@ -1,22 +1,16 @@
 import os.path, subprocess
 
-from build.project import Project
+from build.cmake import CmakeProject
 
-class ZlibProject(Project):
-    def __init__(self, url, md5, installed,
-                 **kwargs):
-        Project.__init__(self, url, md5, installed, **kwargs)
+class ZlibProject(CmakeProject):
+    def __init__(self, *args, **kwargs):
+        super(ZlibProject, self).__init__(*args, **kwargs)
 
     def build(self, toolchain):
-        src = self.unpack(toolchain, out_of_tree=False)
+        super(ZlibProject, self).build(toolchain)
 
-        subprocess.check_call(['/usr/bin/make', '--quiet',
-            '-f', 'win32/Makefile.gcc',
-            'PREFIX=' + toolchain.arch + '-',
-            '-j12',
-            'install',
-            'INCLUDE_PATH='+ os.path.join(toolchain.install_prefix, 'include'),
-            'LIBRARY_PATH=' + os.path.join(toolchain.install_prefix, 'lib'),
-            'BINARY_PATH=' + os.path.join(toolchain.install_prefix, 'bin'),
-            ],
-            cwd=src, env=toolchain.env)
+        static_zlib = os.path.join(toolchain.install_prefix, 'lib', 'zlibstatic.lib')
+        dynamic_zlib = os.path.join(toolchain.install_prefix, 'lib', 'zlib.lib')
+        if os.path.exists(static_zlib):
+            os.unlink(dynamic_zlib)
+            os.rename(static_zlib, dynamic_zlib)

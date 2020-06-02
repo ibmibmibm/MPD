@@ -134,7 +134,22 @@ if is_windows
     '-DWINVER=0x0600', '-D_WIN32_WINNT=0x0600',
     '-DSTRICT',
     '-DUNICODE', '-D_UNICODE',
+    '-DNOMINMAX', '-D_USE_MATH_DEFINES', '-D_CRT_SECURE_NO_WARNINGS',
   ]
+
+  if compiler.get_id() == 'clang-cl'
+    common_cppflags += [
+      '-Wno-c++98-compat',
+      '-Wno-c++98-compat-pedantic',
+      '-Wno-documentation',
+      '-Wno-documentation-unknown-command',
+      '-Wno-format-nonliteral',
+      '-Wno-language-extension-token',
+      '-Wno-nonportable-system-include-path',
+      '-Wno-old-style-cast',
+      '-Wno-reserved-id-macro',
+    ]
+  endif
 
   subdir('win32')
 endif

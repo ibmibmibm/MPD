@@ -2,6 +2,8 @@ import re
 from os.path import abspath
 
 from build.project import Project
+from build.mad import MadProject
+from build.lame import LameProject
 from build.zlib import ZlibProject
 from build.meson import MesonProject
 from build.cmake import CmakeProject
@@ -15,71 +17,88 @@ libmpdclient = MesonProject(
     'lib/libmpdclient.a',
 )
 
-libogg = AutotoolsProject(
-    'http://downloads.xiph.org/releases/ogg/libogg-1.3.4.tar.xz',
-    'c163bc12bc300c401b6aa35907ac682671ea376f13ae0969a220f7ddf71893fe',
-    'lib/libogg.a',
+libogg = CmakeProject(
+    'https://github.com/xiph/ogg/archive/v1.3.4.tar.gz',
+    '3da31a4eb31534b6f878914b7379b873c280e610649fe5c07935b3d137a828bc',
+    ('lib/libogg.a', 'lib/ogg.lib'),
     [
-        '--disable-shared', '--enable-static',
+        '-DBUILD_SHARED_LIBS=ON',
+        '-DINSTALL_DOCS=OFF',
     ],
+    base='ogg-1.3.4',
+    name='libogg',
+    version='1.3.4',
 )
 
-libvorbis = AutotoolsProject(
-    'http://downloads.xiph.org/releases/vorbis/libvorbis-1.3.6.tar.xz',
-    'af00bb5a784e7c9e69f56823de4637c350643deedaf333d0fa86ecdba6fcb415',
-    'lib/libvorbis.a',
+libvorbis = CmakeProject(
+    'https://github.com/xiph/vorbis/archive/v1.3.6.tar.gz',
+    '43fc4bc34f13da15b8acfa72fd594678e214d1cab35fc51d3a54969a725464eb',
+    ('lib/libvorbis.a', 'lib/vorbis.lib'),
     [
-        '--disable-shared', '--enable-static',
+        '-DBUILD_SHARED_LIBS=ON',
     ],
+    base='vorbis-1.3.6',
+    name='libvorbis',
+    version='1.3.6',
+)
 
+opus = CmakeProject(
+    'https://archive.mozilla.org/pub/opus/opus-1.3.1.tar.gz',
+    '65b58e1e25b2a114157014736a3d9dfeaad8d41be1c8179866f144a2fb44ff9d',
+    ('lib/libopus.a', 'lib/opus.lib'),
+    [
+        '-DBUILD_SHARED_LIBS=ON',
+        '-DOPUS_FIXED_POINT=ON',
+    ],
+    base='opus-1.3.1',
+    name='libopus',
+    version='1.3.1',
     edits={
-        # this option is not understood by clang
-        'configure': lambda data: data.replace('-mno-ieee-fp', ' '),
+        'CMakeLists.txt': lambda data: data.replace('include(opus_buildtype.cmake)', ''),
     }
 )
 
-opus = AutotoolsProject(
-    'https://archive.mozilla.org/pub/opus/opus-1.3.1.tar.gz',
-    '65b58e1e25b2a114157014736a3d9dfeaad8d41be1c8179866f144a2fb44ff9d',
-    'lib/libopus.a',
+flac = CmakeProject(
+    'https://github.com/xiph/flac/archive/1.3.3.tar.gz',
+    '668cdeab898a7dd43cf84739f7e1f3ed6b35ece2ef9968a5c7079fe9adfe1689',
+    ('lib/libFLAC.a', 'lib/FLAC.lib'),
     [
-        '--disable-shared', '--enable-static',
-        '--disable-doc',
-        '--disable-extra-programs',
+        '-DBUILD_SHARED_LIBS=ON',
+        '-DBUILD_EXAMPLES=ON',
     ],
-
-    # suppress "visibility default" from opus_defines.h
-    cppflags='-DOPUS_EXPORT=',
+    base='flac-1.3.3',
+    name='libflac',
+    version='1.3.3',
 )
 
-flac = AutotoolsProject(
-    'http://downloads.xiph.org/releases/flac/flac-1.3.3.tar.xz',
-    '213e82bd716c9de6db2f98bcadbc4c24c7e2efe8c75939a1a84e28539c4e1748',
-    'lib/libFLAC.a',
-    [
-        '--disable-shared', '--enable-static',
-        '--disable-xmms-plugin', '--disable-cpplibs',
-        '--disable-doxygen-docs',
-    ],
-    subdirs=['include', 'src/libFLAC'],
-)
-
-zlib = ZlibProject(
+zlib = CmakeProject(
     'http://zlib.net/zlib-1.2.11.tar.xz',
     '4ff941449631ace0d4d203e3483be9dbc9da454084111f97ea0a2114e19bf066',
-    'lib/libz.a',
+    ('lib/libz.a', 'lib/zlib.lib'),
+    [
+        '-DBUILD_SHARED_LIBS=ON',
+    ],
+    base='zlib-1.2.11',
+    name='zlib',
+    version='1.2.11',
+    edits={
+        # https://github.com/madler/zlib/issues/268
+        'gzguts.h': lambda data: data.replace('#if defined(_WIN32) || defined(__CYGWIN__)', '#if defined(_WIN32) || defined(__MINGW32__)'),
+        'zconf.h.cmakein': lambda data: data.replace('#ifdef HAVE_UNISTD_H', '#if defined(HAVE_UNISTD_H) && HAVE_UNISTD_H').replace('#ifdef HAVE_STDARG_H', '#if defined(HAVE_STDARG_H) && HAVE_STDARG_H')
+    }
 )
 
-libid3tag = AutotoolsProject(
+libid3tag = MadProject(
     'ftp://ftp.mars.org/pub/mpeg/libid3tag-0.15.1b.tar.gz',
     'e5808ad997ba32c498803822078748c3',
-    'lib/libid3tag.a',
+    ('lib/libid3tag.a', 'lib/libid3tag.lib'),
     [
-        '--disable-shared', '--enable-static',
+        '--enable-shared', '--disable-static',
 
         # without this, libid3tag's configure.ac ignores -O* and -f*
         '--disable-debugging',
     ],
+    dsp_file='libid3tag.dsp',
     autogen=True,
 
     edits={
@@ -88,59 +107,74 @@ libid3tag = AutotoolsProject(
     }
 )
 
-libmad = AutotoolsProject(
+libmad = MadProject(
     'ftp://ftp.mars.org/pub/mpeg/libmad-0.15.1b.tar.gz',
     '1be543bc30c56fb6bea1d7bf6a64e66c',
-    'lib/libmad.a',
+    ('lib/libmad.a', 'lib/libmad.lib'),
     [
-        '--disable-shared', '--enable-static',
+        '--enable-shared', '--disable-static',
 
         # without this, libmad's configure.ac ignores -O* and -f*
         '--disable-debugging',
     ],
+    dsp_file='libmad.dsp',
     autogen=True,
 )
 
-liblame = AutotoolsProject(
+liblame = LameProject(
     'http://downloads.sourceforge.net/project/lame/lame/3.100/lame-3.100.tar.gz',
     'ddfe36cab873794038ae2c1210557ad34857a4b6bdc515785d1da9e175b1da1e',
-    'lib/libmp3lame.a',
+    ('lib/libmp3lame.a', 'lib/mp3lame.lib'),
     [
-        '--disable-shared', '--enable-static',
+        '--enable-shared', '--disable-static',
         '--disable-gtktest', '--disable-analyzer-hooks',
         '--disable-decoder', '--disable-frontend',
     ],
 )
 
-libmodplug = AutotoolsProject(
-    'https://downloads.sourceforge.net/modplug-xmms/libmodplug/0.8.9.0/libmodplug-0.8.9.0.tar.gz',
-    '457ca5a6c179656d66c01505c0d95fafaead4329b9dbaa0f997d00a3508ad9de',
-    'lib/libmodplug.a',
+libmodplug = CmakeProject(
+    'https://github.com/Konstanty/libmodplug/archive/5a39f5913d07ba3e61d8d5afdba00b70165da81d.tar.gz',
+    '7d472134fce267e3407caed1247b91c3dab24d7956b439027eabf2832c63845d',
+    ('lib/libmodplug.a', 'lib/modplug.lib'),
     [
-        '--disable-shared', '--enable-static',
+        '-DBUILD_SHARED_LIBS=ON',
     ],
+    base='libmodplug-5a39f5913d07ba3e61d8d5afdba00b70165da81d',
+    name='libmodplug',
+    version='1.3.3',
+    edits={
+        'src/fastmix.cpp': lambda data: data.replace('register MODCHANNEL * const pChn = pChannel', 'MODCHANNEL * const pChn = pChannel')
+    },
 )
 
 wildmidi = CmakeProject(
     'https://codeload.github.com/Mindwerks/wildmidi/tar.gz/wildmidi-0.4.3',
     '498e5a96455bb4b91b37188ad6dcb070824e92c44f5ed452b90adbaec8eef3c5',
-    'lib/libWildMidi.a',
+    ('lib/libWildMidi.a', 'lib/wildmidi.lib'),
     [
-        '-DBUILD_SHARED_LIBS=OFF',
+        '-DBUILD_SHARED_LIBS=ON',
         '-DWANT_PLAYER=OFF',
         '-DWANT_STATIC=ON',
     ],
     base='wildmidi-wildmidi-0.4.3',
     name='wildmidi',
     version='0.4.3',
+    edits={
+        # fix bug in libid3tag's configure.ac which discards all but the last optimization flag
+        'src/CMakeLists.txt': lambda data: data \
+            .replace('IF (WIN32 AND CMAKE_COMPILER_IS_MINGW)', 'IF (WIN32)') \
+            .replace('IF (WIN32 AND MSVC)', 'IF (WIN32 AND FALSE)') \
+            .replace('SET(LIBRARY_DYN_NAME "wildmidi_dynamic")', 'SET(LIBRARY_DYN_NAME "wildmidi")') \
+            .replace('${CMAKE_BINARY_DIR}\\\\${CMAKE_BUILD_TYPE}\\\\', '${CMAKE_BINARY_DIR}/'),
+    }
 )
 
 ffmpeg = FfmpegProject(
     'http://ffmpeg.org/releases/ffmpeg-4.2.3.tar.xz',
     '9df6c90aed1337634c1fb026fb01c154c29c82a64ea71291ff2da9aacb9aad31',
-    'lib/libavcodec.a',
+    ('lib/libavcodec.a', 'lib/avcodec.lib'),
     [
-        '--disable-shared', '--enable-static',
+        '--enable-shared', '--disable-static',
         '--enable-gpl',
         '--enable-small',
         '--disable-pthreads',
@@ -364,60 +398,54 @@ ffmpeg = FfmpegProject(
     ],
 )
 
-curl = AutotoolsProject(
+curl = CmakeProject(
     'http://curl.haxx.se/download/curl-7.70.0.tar.xz',
     '032f43f2674008c761af19bf536374128c16241fb234699a55f9fb603fcfbae7',
-    'lib/libcurl.a',
+    ('lib/libcurl.a', 'lib/libcurl.lib'),
     [
-        '--disable-shared', '--enable-static',
-        '--disable-debug',
-        '--enable-http',
-        '--enable-ipv6',
-        '--disable-ftp', '--disable-file',
-        '--disable-ldap', '--disable-ldaps',
-        '--disable-rtsp', '--disable-proxy', '--disable-dict', '--disable-telnet',
-        '--disable-tftp', '--disable-pop3', '--disable-imap', '--disable-smtp',
-        '--disable-smb',
-        '--disable-gopher',
-        '--disable-manual',
-        '--disable-threaded-resolver', '--disable-verbose', '--disable-sspi',
-        '--disable-crypto-auth', '--disable-ntlm-wb', '--disable-tls-srp', '--disable-cookies',
-        '--disable-doh',
-        '--disable-mime',
-        '--disable-netrc',
-        '--disable-progress-meter',
-        '--disable-alt-svc',
-        '--without-ssl', '--without-gnutls', '--without-nss', '--without-libssh2',
+        '-DBUILD_SHARED_LIBS=ON',
+        '-DCURL_LTO=ON',
+        '-DENABLE_THREADED_RESOLVER=OFF',
+        '-DHTTP_ONLY=ON',
+        '-DCURL_DISABLE_VERBOSE_STRINGS=ON',
+        '-DENABLE_IPV6=ON',
+        '-DCMAKE_USE_LIBSSH2=OFF',
+        '-DCMAKE_USE_WINSSL=ON',
+        '-DENABLE_UNIX_SOCKETS=OFF',
     ],
-
+    base='curl-7.70.0',
+    name='curl',
+    version='7.70.0',
+    edits={
+        'CMakeLists.txt': lambda data: data.replace('/MANIFEST:NO', '-MANIFEST:NO')
+    },
     patches='src/lib/curl/patches',
 )
 
-libexpat = AutotoolsProject(
+libexpat = CmakeProject(
     'https://github.com/libexpat/libexpat/releases/download/R_2_2_9/expat-2.2.9.tar.bz2',
     'f1063084dc4302a427dabcca499c8312b3a32a29b7d2506653ecc8f950a9a237',
-    'lib/libexpat.a',
+    ('lib/libexpat.a', 'lib/libexpat.lib'),
     [
-        '--disable-shared', '--enable-static',
-        '--without-docbook',
+        '-DBUILD_SHARED_LIBS=ON',
+        '-DEXPAT_BUILD_DOCS=OFF',
     ],
+    base='expat-2.2.9',
+    name='expat',
+    version='2.2.9',
 )
 
-libnfs = AutotoolsProject(
-    'https://github.com/sahlberg/libnfs/archive/libnfs-4.0.0.tar.gz',
-    '6ee77e9fe220e2d3e3b1f53cfea04fb319828cc7dbb97dd9df09e46e901d797d',
-    'lib/libnfs.a',
+libnfs = CmakeProject(
+    'https://github.com/sahlberg/libnfs/archive/46c8a3006a084c05336ea56fc7957b2dad9342e7.tar.gz',
+    '16ba5c8e85b188c51d3713dfba156ac8ef5b20b51cd0a516a6e6a3bc4bea3052',
+    ('lib/libnfs.a', 'lib/nfs.lib'),
     [
-        '--disable-shared', '--enable-static',
-        '--disable-debug',
-
-        # work around -Wtautological-compare
-        '--disable-werror',
-
-        '--disable-utils', '--disable-examples',
+        '-DBUILD_SHARED_LIBS=ON',
     ],
-    base='libnfs-libnfs-4.0.0',
-    autoreconf=True,
+    base='libnfs-46c8a3006a084c05336ea56fc7957b2dad9342e7',
+    name='libnfs',
+    version='4.0.0',
+    patches='src/lib/nfs/patches',
 )
 
 boost = BoostProject(

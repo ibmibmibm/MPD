@@ -1,0 +1,15 @@
+--- "a/include/win32/win32_compat.h" 2020-05-20 05:35:49.000000000 +0800
++++ "b/include/win32/win32_compat.h" 2020-06-02 17:47:13.459509000 +0800
+@@ -129,8 +129,11 @@
+
+ #ifndef ESTALE
+ #define ESTALE 116
+-#endif
++#endif
+
++#ifndef __MINGW32__
++struct timezone;
++#endif
+ /* Wrapper macros to call misc. functions win32 is missing */
+ #define poll(x, y, z)        win32_poll(x, y, z)
+ //#define snprintf             sprintf_s

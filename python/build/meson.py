@@ -40,7 +40,7 @@ c = '%s'
 cpp = '%s'
 ar = '%s'
 strip = '%s'
-pkgconfig = '%s'
+%s
 %s
 
 [properties]
@@ -61,7 +61,7 @@ cpu_family = '%s'
 cpu = '%s'
 endian = '%s'
             """ % (toolchain.cc, toolchain.cxx, toolchain.ar, toolchain.strip,
-                   toolchain.pkg_config,
+                   ("" if toolchain.native else ("pkgconfig = '%s'" % toolchain.pkg_config)),
                    windres,
                    toolchain.install_prefix,
                    repr((toolchain.cppflags + ' ' + toolchain.cflags).split()),
@@ -73,6 +73,7 @@ endian = '%s'
 
 def configure(toolchain, src, build, args=()):
     cross_file = make_cross_file(toolchain)
+    cross_file_option = '--native-file' if toolchain.native else '--cross-file'
     configure = [
         'meson',
         src, build,
@@ -88,7 +89,7 @@ def configure(toolchain, src, build, args=()):
 
         '--default-library=static',
 
-        '--cross-file', cross_file,
+        cross_file_option, cross_file,
     ] + args
 
     subprocess.check_call(configure, env=toolchain.env)
