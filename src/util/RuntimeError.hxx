@@ -30,26 +30,47 @@
 #ifndef RUNTIME_ERROR_HXX
 #define RUNTIME_ERROR_HXX
 
+#include "util/Compiler.h"
+
+#include <cassert>
+#include <cstdarg>
 #include <cstdio>
+#include <memory>
 #include <stdexcept>
 #include <utility>
 
-template<typename... Args>
-static inline std::runtime_error
-FormatRuntimeError(const char *fmt, Args&&... args) noexcept
-{
-	char buffer[1024];
-	std::snprintf(buffer, sizeof(buffer), fmt, std::forward<Args>(args)...);
-	return std::runtime_error(buffer);
+gcc_printf(1, 2) static inline std::runtime_error
+	FormatRuntimeError(const char *fmt, ...) noexcept {
+	std::va_list args1, args2;
+	va_start(args1, fmt);
+	va_copy(args2, args1);
+
+	const int size = std::vsnprintf(nullptr, 0, fmt, args1);
+	va_end(args1);
+	assert(size >= 0);
+
+	auto buffer = std::make_unique<char[]>(size + 1);
+	std::vsprintf(buffer.get(), fmt, args2);
+	va_end(args2);
+
+	return std::runtime_error(std::string(buffer.get(), size));
 }
 
-template<typename... Args>
-inline std::invalid_argument
-FormatInvalidArgument(const char *fmt, Args&&... args) noexcept
-{
-	char buffer[1024];
-	std::snprintf(buffer, sizeof(buffer), fmt, std::forward<Args>(args)...);
-	return std::invalid_argument(buffer);
+gcc_printf(1, 2) static inline std::invalid_argument
+	FormatInvalidArgument(const char *fmt, ...) noexcept {
+	std::va_list args1, args2;
+	va_start(args1, fmt);
+	va_copy(args2, args1);
+
+	const int size = std::vsnprintf(nullptr, 0, fmt, args1);
+	va_end(args1);
+	assert(size >= 0);
+
+	auto buffer = std::make_unique<char[]>(size + 1);
+	std::vsprintf(buffer.get(), fmt, args2);
+	va_end(args2);
+
+	return std::invalid_argument(std::string(buffer.get(), size));
 }
 
 #endif

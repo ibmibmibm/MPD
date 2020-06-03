@@ -153,8 +153,8 @@ try {
 
 	/* play */
 
-	FileDescriptor input_fd(STDIN_FILENO);
-	FileDescriptor output_fd(STDOUT_FILENO);
+	FileDescriptor input_fd(0);
+	FileDescriptor output_fd(1);
 
 	while (true) {
 		char buffer[4096];

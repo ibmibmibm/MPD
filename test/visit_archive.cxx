@@ -26,14 +26,15 @@
 #include "archive/ArchivePlugin.hxx"
 #include "archive/ArchiveFile.hxx"
 #include "archive/ArchiveVisitor.hxx"
+#include "fs/Charset.hxx"
 #include "fs/Path.hxx"
 #include "util/PrintException.hxx"
+
+#include "win32/unistd.hxx"
 
 #include <cstdio>
 #include <cstdlib>
 #include <stdexcept>
-
-#include <unistd.h>
 
 class GlobalInit {
 	EventThread io_thread;
@@ -68,7 +69,7 @@ try {
 	}
 
 	const char *plugin_name = argv[1];
-	const Path path = Path::FromFS(argv[2]);
+	const Path path = Path::FromFS(PathFromUTF8(argv[2]).c_str());
 
 	/* initialize MPD */
 

@@ -146,7 +146,8 @@ mikmod_decoder_file_decode(DecoderClient &client, Path path_fs)
 {
 	/* deconstify the path because libmikmod wants a non-const
 	   string pointer */
-	char *const path2 = const_cast<char *>(path_fs.c_str());
+	const std::string path_s = path_fs.ToUTF8();
+	char *const path2 = const_cast<char *>(path_s.c_str());
 
 	MODULE *handle;
 	int ret;
@@ -156,7 +157,7 @@ mikmod_decoder_file_decode(DecoderClient &client, Path path_fs)
 
 	if (handle == nullptr) {
 		FormatError(mikmod_domain,
-			    "failed to open mod: %s", path_fs.c_str());
+			    "failed to open mod: %s", path_s.c_str());
 		return;
 	}
 
@@ -184,13 +185,14 @@ mikmod_decoder_scan_file(Path path_fs, TagHandler &handler) noexcept
 {
 	/* deconstify the path because libmikmod wants a non-const
 	   string pointer */
-	char *const path2 = const_cast<char *>(path_fs.c_str());
+	const std::string path_s = path_fs.ToUTF8();
+	char *const path2 = const_cast<char *>(path_s.c_str());
 
 	MODULE *handle = Player_Load(path2, 128, 0);
 
 	if (handle == nullptr) {
 		FormatDebug(mikmod_domain,
-			    "Failed to open file: %s", path_fs.c_str());
+			    "Failed to open file: %s", path_s.c_str());
 		return false;
 	}
 

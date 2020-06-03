@@ -35,23 +35,33 @@
 #include <ctime>
 #include <stdexcept>
 
+#ifdef _WIN32
+#include <clocale>
+#include <iomanip>
+#include <sstream>
+namespace {
+const char* strptime(const char* s, const char* f, std::tm* tm) {
+	std::istringstream input(s);
+	input.imbue(std::locale(std::setlocale(LC_ALL, nullptr)));
+	input >> std::get_time(tm, f);
+	if (input.fail()) {
+		return nullptr;
+	}
+	return s + input.tellg();
+}
+} // namespace
+#endif
+
 std::chrono::system_clock::time_point
 ParseTimePoint(const char *s, const char *format)
 {
 	assert(s != nullptr);
 	assert(format != nullptr);
 
-#ifdef _WIN32
-	/* TODO: emulate strptime()? */
-	(void)s;
-	(void)format;
-	throw std::runtime_error("Time parsing not implemented on Windows");
-#else
 	std::tm tm{};
 	const char *end = strptime(s, format, &tm);
 	if (end == nullptr || *end != 0)
 		throw std::runtime_error("Failed to parse time stamp");
 
 	return TimeGm(tm);
-#endif /* !_WIN32 */
 }

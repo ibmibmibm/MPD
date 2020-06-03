@@ -21,7 +21,7 @@
 #include "../OutputAPI.hxx"
 #include "util/RuntimeError.hxx"
 
-#include <unistd.h>
+#include "win32/unistd.hxx"
 
 #ifndef __APPLE__
 #include <AL/al.h>
@@ -193,8 +193,13 @@ OpenALOutput::Play(const void *chunk, size_t size)
 		filled++;
 	} else {
 		/* wait for processed buffer */
-		while (!HasProcessed())
+		while (!HasProcessed()) {
+#ifndef _WIN32
 			usleep(10);
+#else
+			Sleep(1);
+#endif
+		}
 
 		alSourceUnqueueBuffers(source, 1, &buffer);
 	}

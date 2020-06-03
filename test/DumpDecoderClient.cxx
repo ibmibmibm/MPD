@@ -23,9 +23,9 @@
 #include "util/StringBuffer.hxx"
 #include "util/Compiler.h"
 
-#include <cstdio>
+#include "win32/unistd.hxx"
 
-#include <unistd.h>
+#include <cstdio>
 
 void
 DumpDecoderClient::Ready(const AudioFormat audio_format,
@@ -101,7 +101,7 @@ DumpDecoderClient::SubmitData([[maybe_unused]] InputStream *is,
 		std::fprintf(stderr, "%u kbit/s\n", kbit_rate);
 	}
 
-	[[maybe_unused]] ssize_t nbytes = write(STDOUT_FILENO, data, datalen);
+	[[maybe_unused]] size_t nbytes = std::fwrite(data, datalen, 1, stdout);
 	return GetCommand();
 }
 

@@ -29,7 +29,7 @@ TEST(PcmTest, Dither24)
 
 	int16_t dest[N];
 	PcmDither dither;
-	dither.Dither24To16(dest, src.begin(), src.end());
+	dither.Dither24To16(dest, src.data(), src.data() + src.size());
 
 	for (unsigned i = 0; i < N; ++i) {
 		EXPECT_GE(dest[i], (src[i] >> 8) - 8);
@@ -44,7 +44,7 @@ TEST(PcmTest, Dither32)
 
 	int16_t dest[N];
 	PcmDither dither;
-	dither.Dither32To16(dest, src.begin(), src.end());
+	dither.Dither32To16(dest, src.data(), src.data() + src.size());
 
 	for (unsigned i = 0; i < N; ++i) {
 		EXPECT_GE(dest[i], (src[i] >> 16) - 8);

@@ -17,6 +17,7 @@ curl = static_library(
   dependencies: [
     log_dep,
     curl_dep,
+    event_dep,
   ],
 )
 
@@ -26,5 +27,6 @@ curl_dep = declare_dependency(
     event_dep,
     util_dep,
     curl_dep,
+    event_dep,
   ],
 )

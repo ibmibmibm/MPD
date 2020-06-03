@@ -196,7 +196,7 @@ mpd_mpg123_file_decode(DecoderClient &client, Path path_fs)
 	AtScopeExit(handle) { mpg123_delete(handle); };
 
 	AudioFormat audio_format;
-	if (!mpd_mpg123_open(handle, path_fs.c_str(), audio_format))
+	if (!mpd_mpg123_open(handle, path_fs.ToUTF8().c_str(), audio_format))
 		return;
 
 	const off_t num_samples = mpg123_length(handle);
@@ -287,7 +287,8 @@ mpd_mpg123_scan_file(Path path_fs, TagHandler &handler) noexcept
 
 	AudioFormat audio_format;
 	try {
-		if (!mpd_mpg123_open(handle, path_fs.c_str(), audio_format)) {
+		const std::string path_s = path_fs.ToUTF8();
+		if (!mpd_mpg123_open(handle, path_s.c_str(), audio_format)) {
 			return false;
 		}
 	} catch (...) {

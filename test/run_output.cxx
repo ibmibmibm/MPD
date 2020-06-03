@@ -31,13 +31,13 @@
 #include "util/ScopeExit.hxx"
 #include "util/PrintException.hxx"
 
+#include "win32/unistd.hxx"
+
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <memory>
-
-#include <unistd.h>
 
 static std::unique_ptr<AudioOutput>
 LoadAudioOutput(const ConfigData &config, EventLoop &event_loop,

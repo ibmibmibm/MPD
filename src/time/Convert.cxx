@@ -36,7 +36,11 @@
 #include <ctime>
 #include <stdexcept>
 
+#ifndef _WIN32
 #include <sys/time.h> /* for struct timeval */
+#else
+#include <winsock.h>
+#endif
 
 std::tm
 GmTime(std::chrono::system_clock::time_point tp)
@@ -94,9 +98,11 @@ GetTimeZoneOffset() noexcept
 std::chrono::system_clock::time_point
 TimeGm(std::tm &tm) noexcept
 {
-#ifdef __GLIBC__
+#if defined(__GLIBC__)
 	/* timegm() is a GNU extension */
 	const auto t = timegm(&tm);
+#elif defined(_WIN32)
+	const auto t = _mkgmtime(&tm);
 #else
 	tm.tm_isdst = 0;
 	const auto t = mktime(&tm) + GetTimeZoneOffset();

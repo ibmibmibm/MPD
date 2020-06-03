@@ -24,12 +24,10 @@
 
 #include <array>
 
+#include "win32/unistd.hxx"
 #ifdef _WIN32
-#include <windows.h>
 #include <shlobj.h>
 #else
-#include <cstdlib>
-#include <unistd.h>
 #include <pwd.h>
 #endif
 

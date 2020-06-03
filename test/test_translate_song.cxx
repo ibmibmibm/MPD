@@ -24,6 +24,21 @@
 #include <cstdio>
 #include <cstring>
 
+template <typename, typename = void>
+constexpr bool is_type_complete_v = false;
+template <typename T>
+constexpr bool is_type_complete_v<T, std::void_t<decltype(sizeof(T))>> = true;
+
+template <typename T>
+T& insecure_object() {
+	if constexpr(is_type_complete_v<T>) {
+		static std::aligned_union_t <0, T> insecure_object_instance;
+		return reinterpret_cast<T&>(insecure_object_instance);
+	} else {
+		return *reinterpret_cast<T*>(8);
+	}
+}
+
 void
 Log(LogLevel, const Domain &domain, const char *msg) noexcept
 {
@@ -127,6 +142,12 @@ Client::AllowFile([[maybe_unused]] Path path_fs) const
 	throw std::runtime_error("foo");
 }
 
+BufferedSocket::InputResult
+Client::OnSocketInput(void *, size_t) noexcept
+{
+	return InputResult::CLOSED;
+}
+
 static std::string
 ToString(const Tag &tag)
 {
@@ -199,7 +220,7 @@ TEST_F(TranslateSongTest, Insecure)
 {
 	/* illegal because secure=false */
 	DetachedSong song1 (uri1);
-	const SongLoader loader(*reinterpret_cast<const Client *>(1));
+	const SongLoader loader(insecure_object<Client>());
 	EXPECT_FALSE(playlist_check_translate_song(song1, {},
 						   loader));
 }
@@ -217,7 +238,7 @@ TEST_F(TranslateSongTest, Secure)
 
 TEST_F(TranslateSongTest, InDatabase)
 {
-	const SongLoader loader(reinterpret_cast<const Database *>(1),
+	const SongLoader loader(&insecure_object<const Database>(),
 				storage);
 
 	DetachedSong song1("doesntexist");
@@ -239,9 +260,9 @@ TEST_F(TranslateSongTest, InDatabase)
 
 TEST_F(TranslateSongTest, Relative)
 {
-	const Database &db = *reinterpret_cast<const Database *>(1);
+	const Database &db = insecure_object<const Database>();
 	const SongLoader secure_loader(&db, storage);
-	const SongLoader insecure_loader(*reinterpret_cast<const Client *>(1),
+	const SongLoader insecure_loader(insecure_object<const Client>(),
 					 &db, storage);
 
 	/* map to music_directory */
@@ -273,7 +294,7 @@ TEST_F(TranslateSongTest, Relative)
 
 TEST_F(TranslateSongTest, Backslash)
 {
-	const SongLoader loader(reinterpret_cast<const Database *>(1),
+	const SongLoader loader(&insecure_object<const Database>(),
 				storage);
 
 	DetachedSong song1("foo\\bar.ogg", MakeTag2b());

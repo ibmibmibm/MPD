@@ -29,7 +29,7 @@ TEST(PcmTest, Pack24)
 	const auto src = TestDataBuffer<int32_t, N>(RandomInt24());
 
 	uint8_t dest[N * 3];
-	pcm_pack_24(dest, src.begin(), src.end());
+	pcm_pack_24(dest, src.data(), src.data() + src.size());
 
 	for (unsigned i = 0; i < N; ++i) {
 		int32_t d;
@@ -52,7 +52,7 @@ TEST(PcmTest, Unpack24)
 	const auto src = TestDataBuffer<uint8_t, N * 3>();
 
 	int32_t dest[N];
-	pcm_unpack_24(dest, src.begin(), src.end());
+	pcm_unpack_24(dest, src.data(), src.data() + src.size());
 
 	for (unsigned i = 0; i < N; ++i) {
 		int32_t s;
@@ -75,7 +75,7 @@ TEST(PcmTest, Unpack24BE)
 	const auto src = TestDataBuffer<uint8_t, N * 3>();
 
 	int32_t dest[N];
-	pcm_unpack_24be(dest, src.begin(), src.end());
+	pcm_unpack_24be(dest, src.data(), src.data() + src.size());
 
 	for (unsigned i = 0; i < N; ++i) {
 		int32_t s;

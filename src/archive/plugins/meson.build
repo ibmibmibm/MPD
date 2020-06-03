@@ -8,7 +8,10 @@ if libiso9660_dep.found()
   found_archive_plugin = true
 endif
 
-libbz2_dep = c_compiler.find_library('bz2', required: get_option('bzip2'))
+libbz2_dep = dependency('bzip2', required: false)
+if not libbz2_dep.found()
+  libbz2_dep = c_compiler.find_library('bz2', required: get_option('bzip2'))
+endif
 archive_features.set('ENABLE_BZ2', libbz2_dep.found())
 if libbz2_dep.found()
   archive_plugins_sources += 'Bzip2ArchivePlugin.cxx'
@@ -38,5 +41,6 @@ archive_plugins_dep = declare_dependency(
   dependencies: [
     archive_api_dep,
     input_glue_dep,
+    libbz2_dep,
   ],
 )

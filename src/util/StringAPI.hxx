@@ -31,6 +31,7 @@
 #define STRING_API_HXX
 
 #include "Compiler.h"
+#include "Strings.hxx"
 
 #include <cstring>
 

@@ -190,6 +190,7 @@ if zlib_dep.found()
     include_directories: inc,
     dependencies: [
       fs_dep,
+      zlib_dep,
     ],
   )
 
@@ -199,6 +200,7 @@ if zlib_dep.found()
     include_directories: inc,
     dependencies: [
       fs_dep,
+      zlib_dep,
     ],
   )
 endif
@@ -292,6 +294,7 @@ if enable_database
       tag_dep,
       storage_glue_dep,
       gtest_dep,
+      boost_dep,
     ],
   ))
 endif

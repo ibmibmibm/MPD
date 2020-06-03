@@ -64,11 +64,38 @@ FormatFatalError(const char *fmt, ...)
 void
 FatalSystemError(const char *msg, DWORD code)
 {
-	char buffer[256];
-	FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM |
+	char buffer[512];
+	buffer[0] = '\0';
+	{
+		wchar_t w_msg[128];
+		DWORD w_msg_length = FormatMessageW(
+			FORMAT_MESSAGE_FROM_SYSTEM |
 		       FORMAT_MESSAGE_IGNORE_INSERTS,
 		       nullptr, code, 0,
-		       buffer, sizeof(buffer), nullptr);
+		       w_msg, 128, nullptr);
+		if (w_msg_length > 0) {
+			int len = WideCharToMultiByte(
+				CP_UTF8, 0, w_msg, w_msg_length,
+				buffer, 512 - 1, nullptr, nullptr);
+			while (len > 0) {
+				switch (buffer[len - 1]) {
+					case '\r':
+					case '\n':
+					case '\t':
+					case '\0':
+						--len;
+						continue;
+					default:
+						;
+				}
+				break;
+			}
+			if (len >= 0) {
+				buffer[len] = '\0';
+			}
+		}
+	}
+
 	FormatFatalError("%s: %s", msg, buffer);
 }
 

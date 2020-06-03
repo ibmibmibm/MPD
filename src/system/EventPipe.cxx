@@ -24,7 +24,7 @@
 
 #include <cassert>
 
-#include <unistd.h>
+#include "win32/unistd.hxx"
 
 #ifdef _WIN32
 #include "net/IPv4Address.hxx"

@@ -21,6 +21,7 @@
 #include "CondHandler.hxx"
 #include "thread/Name.hxx"
 
+#include <algorithm>
 #include <cassert>
 #include <cstring>
 

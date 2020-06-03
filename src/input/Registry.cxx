@@ -17,6 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <algorithm>
 #include "Registry.hxx"
 #include "InputPlugin.hxx"
 #include "input/Features.h"
@@ -51,6 +52,8 @@
 #ifdef ENABLE_CDIO_PARANOIA
 #include "plugins/CdioParanoiaInputPlugin.hxx"
 #endif
+
+#include <algorithm>
 
 const InputPlugin *const input_plugins[] = {
 #ifdef ENABLE_ALSA

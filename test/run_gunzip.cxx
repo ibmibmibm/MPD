@@ -23,10 +23,10 @@
 #include "fs/NarrowPath.hxx"
 #include "util/PrintException.hxx"
 
+#include "win32/unistd.hxx"
+
 #include <cstdio>
 #include <cstdlib>
-
-#include <unistd.h>
 
 static void
 Copy(OutputStream &dest, Reader &src)

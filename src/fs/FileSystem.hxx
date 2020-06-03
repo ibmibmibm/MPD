@@ -23,12 +23,7 @@
 #include "Path.hxx"
 #include "io/UniqueFileDescriptor.hxx"
 
-#ifdef _WIN32
-#include <fileapi.h>
-#endif
-
-#include <sys/stat.h>
-#include <unistd.h>
+#include "win32/unistd.hxx"
 
 class AllocatedPath;
 
@@ -115,7 +110,7 @@ FileExists(Path path, bool follow_symlinks = true)
 #ifdef _WIN32
 	(void)follow_symlinks;
 
-	const auto a = GetFileAttributes(path.c_str());
+	const auto a = GetFileAttributesW(path.c_str());
 	return a != INVALID_FILE_ATTRIBUTES &&
 		(a & (FILE_ATTRIBUTE_DIRECTORY|FILE_ATTRIBUTE_DEVICE)) == 0;
 #else
@@ -133,7 +128,7 @@ DirectoryExists(Path path, bool follow_symlinks = true)
 #ifdef _WIN32
 	(void)follow_symlinks;
 
-	const auto a = GetFileAttributes(path.c_str());
+	const auto a = GetFileAttributesW(path.c_str());
 	return a != INVALID_FILE_ATTRIBUTES && (a & FILE_ATTRIBUTE_DIRECTORY);
 #else
 	struct stat buf;
@@ -148,7 +143,7 @@ static inline bool
 PathExists(Path path)
 {
 #ifdef _WIN32
-	return GetFileAttributes(path.c_str()) != INVALID_FILE_ATTRIBUTES;
+	return GetFileAttributesW(path.c_str()) != INVALID_FILE_ATTRIBUTES;
 #else
 	return CheckAccess(path, F_OK);
 #endif

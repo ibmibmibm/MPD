@@ -33,9 +33,9 @@
 #include <iterator>
 #include <stdexcept>
 
-#include <sys/stat.h>
-#include <sys/ioctl.h>
 #include <fcntl.h>
+#include <sys/ioctl.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
 #if defined(__OpenBSD__) || defined(__NetBSD__)

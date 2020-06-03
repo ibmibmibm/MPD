@@ -34,7 +34,7 @@
 
 #include <cstdint>
 
-#if defined(__i386__) || defined(__x86_64__) || defined(__ARMEL__)
+#if defined(__i386__) || defined(__x86_64__) || defined(__ARMEL__) || defined(_WIN32)
 /* well-known little-endian */
 #  define IS_LITTLE_ENDIAN true
 #  define IS_BIG_ENDIAN false

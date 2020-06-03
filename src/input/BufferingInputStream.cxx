@@ -21,6 +21,7 @@
 #include "InputStream.hxx"
 #include "thread/Name.hxx"
 
+#include <algorithm>
 #include <cstring>
 
 BufferingInputStream::BufferingInputStream(InputStreamPtr _input)

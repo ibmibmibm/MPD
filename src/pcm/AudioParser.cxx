@@ -124,7 +124,7 @@ ParseChannelCount(const char *src, bool mask, const char **endptr_r)
 	if (endptr == src)
 		throw std::invalid_argument("Failed to parse the channel count");
 	else if (!audio_valid_channel_count(value))
-		throw FormatInvalidArgument("Invalid channel count: %u",
+		throw FormatInvalidArgument("Invalid channel count: %lu",
 					    value);
 
 	*endptr_r = endptr;

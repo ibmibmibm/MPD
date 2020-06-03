@@ -87,7 +87,10 @@ if libgme_dep.found()
   decoder_plugins_sources += 'GmeDecoderPlugin.cxx'
 endif
 
-libmad_dep = c_compiler.find_library('mad', required: get_option('mad'))
+libmad_dep = dependency('libmad', required: false)
+if not libmad_dep.found()
+  libmad_dep = c_compiler.find_library('mad', required: get_option('mad'))
+endif
 decoder_features.set('ENABLE_MAD', libmad_dep.found())
 if libmad_dep.found()
   decoder_plugins_sources += 'MadDecoderPlugin.cxx'

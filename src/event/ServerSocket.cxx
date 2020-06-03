@@ -326,12 +326,16 @@ gcc_pure
 static bool
 SupportsIPv6() noexcept
 {
+#ifdef _WIN32
+	return true;
+#else
 	int fd = socket(AF_INET6, SOCK_STREAM, 0);
 	if (fd < 0)
 		return false;
 
 	close(fd);
 	return true;
+#endif
 }
 
 #endif /* HAVE_IPV6 */

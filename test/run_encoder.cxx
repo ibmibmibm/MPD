@@ -27,12 +27,12 @@
 #include "fs/io/StdioOutputStream.hxx"
 #include "util/PrintException.hxx"
 
+#include "win32/unistd.hxx"
+
 #include <cstdio>
 #include <cstdlib>
 #include <exception>
 #include <memory>
-
-#include <unistd.h>
 
 int main(int argc, char **argv)
 try {
@@ -79,8 +79,8 @@ try {
 
 	/* do it */
 
-	ssize_t nbytes;
-	while ((nbytes = read(0, buffer, sizeof(buffer))) > 0) {
+	size_t nbytes;
+	while ((nbytes = std::fread(buffer, sizeof(buffer), 1, stdin)) > 0) {
 		encoder->Write(buffer, nbytes);
 		EncoderToOutputStream(os, *encoder);
 	}

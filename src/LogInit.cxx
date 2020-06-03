@@ -34,12 +34,11 @@
 #include <cstdio>
 #include <cstring>
 
+#include "win32/unistd.hxx"
+#include <fcntl.h>
 #ifdef ENABLE_SYSTEMD_DAEMON
 #include <systemd/sd-daemon.h>
 #endif
-
-#include <fcntl.h>
-#include <unistd.h>
 
 #define LOG_LEVEL_SECURE LogLevel::INFO
 
@@ -114,8 +113,10 @@ log_early_init(bool verbose) noexcept
 #ifdef ANDROID
 	(void)verbose;
 #else
+
 	/* force stderr to be line-buffered */
-	std::setvbuf(stderr, nullptr, _IOLBF, 0);
+	static char buf[1024];
+	std::setvbuf(stderr, buf, _IOLBF, sizeof(buf));
 
 	if (verbose)
 		SetLogThreshold(LogLevel::DEBUG);

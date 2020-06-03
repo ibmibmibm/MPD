@@ -54,8 +54,8 @@ TagLoadConfig(const ConfigData &config)
 
 		const auto type = tag_name_parse_i(name);
 		if (type == TAG_NUM_OF_ITEM_TYPES)
-			throw FormatRuntimeError("error parsing metadata item \"%s\"",
-						 name);
+			throw FormatRuntimeError("error parsing metadata item \"%.*s\"",
+						 int(name.size), name.data);
 
 		if (plus)
 			global_tag_mask.Set(type);

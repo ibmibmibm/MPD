@@ -22,20 +22,20 @@
 #include "system/Error.hxx"
 #include "util/PrintException.hxx"
 
+#include "win32/unistd.hxx"
+
 #include <cstdio>
 #include <cstdlib>
 
-#include <unistd.h>
-
 static void
-Copy(OutputStream &dest, int src)
+Copy(OutputStream &dest, std::FILE *src)
 {
 	while (true) {
 		char buffer[4096];
-		ssize_t nbytes = read(src, buffer, sizeof(buffer));
-		if (nbytes <= 0) {
-			if (nbytes < 0)
-				throw MakeErrno("read() failed");
+		size_t nbytes = std::fread(buffer, sizeof(buffer), 1, src);
+		if (nbytes == 0) {
+			if (ferror(src))
+				throw MakeErrno("fread() failed");
 
 			return;
 		}
@@ -45,7 +45,7 @@ Copy(OutputStream &dest, int src)
 }
 
 static void
-CopyGzip(OutputStream &_dest, int src)
+CopyGzip(OutputStream &_dest, std::FILE *src)
 {
 	GzipOutputStream dest(_dest);
 	Copy(dest, src);
@@ -53,7 +53,7 @@ CopyGzip(OutputStream &_dest, int src)
 }
 
 static void
-CopyGzip(std::FILE *_dest, int src)
+CopyGzip(std::FILE *_dest, std::FILE * src)
 {
 	StdioOutputStream dest(_dest);
 	CopyGzip(dest, src);
@@ -67,7 +67,7 @@ try {
 		return EXIT_FAILURE;
 	}
 
-	CopyGzip(stdout, STDIN_FILENO);
+	CopyGzip(stdout, stdin);
 	return EXIT_SUCCESS;
 } catch (...) {
 	PrintException(std::current_exception());

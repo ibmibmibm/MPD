@@ -34,9 +34,9 @@
 #include "thread/Cond.hxx"
 #include "util/PrintException.hxx"
 
-#include <cstdlib>
+#include "win32/unistd.hxx"
 
-#include <unistd.h>
+#include <cstdlib>
 
 static void
 tag_save(std::FILE *file, const Tag &tag)

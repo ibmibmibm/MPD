@@ -41,6 +41,50 @@
 #include <stdexcept>
 #include <utility>
 
+#ifdef _WIN32
+#include <clocale>
+#include <iomanip>
+#include <sstream>
+namespace {
+const char* strptime(const char *s, const char *f, std::tm *tm) {
+	std::istringstream input(s);
+	input.imbue(std::locale(std::setlocale(LC_ALL, nullptr)));
+	input >> std::get_time(tm, f);
+	if (input.fail()) {
+		return nullptr;
+	}
+	auto l = input.tellg();
+	if (l == -1) l = std::strlen(s);
+	return s + l;
+}
+const char* strpntime(const char *s, size_t n, const char *f, std::tm *tm) {
+	char stack_buffer[128];
+	std::unique_ptr<char[]> heap_buffer;
+	char *buffer;
+	if (n > 127) {
+		heap_buffer = std::make_unique<char[]>(n + 1);
+		buffer = heap_buffer.get();
+	} else {
+		buffer = stack_buffer;
+	}
+	const char *p = s;
+	char *q = buffer;
+
+	for (size_t i = 0; i < n && std::isdigit(*p); ++i) {
+		*q++ = *p++;
+	}
+	*q++ = '\0';
+	const char *end = strptime(buffer, f, tm);
+	if (end == buffer) {
+		return s;
+	} else if (end) {
+		return p;
+	}
+	return nullptr;
+}
+} // namespace
+#endif
+
 StringBuffer<64>
 FormatISO8601(const std::tm &tm) noexcept
 {
@@ -60,8 +104,6 @@ FormatISO8601(std::chrono::system_clock::time_point tp)
 {
 	return FormatISO8601(GmTime(tp));
 }
-
-#ifndef _WIN32
 
 static std::pair<unsigned, unsigned>
 ParseTimeZoneOffsetRaw(const char *&s)
@@ -122,7 +164,11 @@ ParseTimeOfDay(const char *s, std::tm &tm,
 	   strptime() returns the input string (indicating success)
 	   instead of nullptr (indicating error) */
 
+#ifdef _WIN32
+	const char *end = strpntime(s, 2, "%H", &tm);
+#else
 	const char *end = strptime(s, "%H", &tm);
+#endif
 	if (end == nullptr || end == s)
 		return end;
 
@@ -157,14 +203,22 @@ ParseTimeOfDay(const char *s, std::tm &tm,
 
 	/* without field separators */
 
+#ifdef _WIN32
+	end = strpntime(s, 2, "%M", &tm);
+#else
 	end = strptime(s, "%M", &tm);
+#endif
 	if (end == nullptr || end == s)
 		return s;
 
 	s = end;
 	precision = std::chrono::minutes(1);
 
+#ifdef _WIN32
+	end = strpntime(s, 2, "%S", &tm);
+#else
 	end = strptime(s, "%S", &tm);
+#endif
 	if (end == nullptr || end == s)
 		return s;
 
@@ -172,26 +226,33 @@ ParseTimeOfDay(const char *s, std::tm &tm,
 	return end;
 }
 
-#endif
-
 std::pair<std::chrono::system_clock::time_point,
 	  std::chrono::system_clock::duration>
 ParseISO8601(const char *s)
 {
 	assert(s != nullptr);
 
-#ifdef _WIN32
-	/* TODO: emulate strptime()? */
-	(void)s;
-	throw std::runtime_error("Time parsing not implemented on Windows");
-#else
 	std::tm tm{};
 
 	/* parse the date */
+#ifdef _WIN32
+	const char *end = strptime(s, "%Y-%m-%d", &tm);
+#else
 	const char *end = strptime(s, "%F", &tm);
+#endif
 	if (end == nullptr) {
 		/* try without field separators */
+#ifdef _WIN32
+		end = strpntime(s, 4, "%Y", &tm);
+		if (end) {
+			end = strpntime(end, 2, "%m", &tm);
+			if (end) {
+				end = strpntime(end, 2, "%d", &tm);
+			}
+		}
+#else
 		end = strptime(s, "%Y%m%d", &tm);
+#endif
 		if (end == nullptr)
 			throw std::runtime_error("Failed to parse date");
 	}
@@ -221,5 +282,4 @@ ParseISO8601(const char *s)
 		throw std::runtime_error("Garbage at end of time stamp");
 
 	return std::make_pair(tp, precision);
-#endif /* !_WIN32 */
 }

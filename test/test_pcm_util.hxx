@@ -64,6 +64,7 @@ template<typename T, size_t N>
 class TestDataBuffer : std::array<T, N> {
 public:
 	using typename std::array<T, N>::const_pointer;
+	using std::array<T, N>::data;
 	using std::array<T, N>::size;
 	using std::array<T, N>::begin;
 	using std::array<T, N>::end;
@@ -77,15 +78,15 @@ public:
 	}
 
 	operator typename std::array<T, N>::const_pointer() const {
-		return begin();
+		return data();
 	}
 
 	operator ConstBuffer<T>() const {
-		return { begin(), size() };
+		return { data(), size() };
 	}
 
 	operator ConstBuffer<void>() const {
-		return { begin(), size() * sizeof(T) };
+		return { data(), size() * sizeof(T) };
 	}
 };
 

@@ -27,6 +27,7 @@
 #include "pcm/AudioParser.hxx"
 #include "pcm/AudioFormat.hxx"
 #include "pcm/Convert.hxx"
+#include "fs/Charset.hxx"
 #include "fs/Path.hxx"
 #include "util/ConstBuffer.hxx"
 #include "util/StaticFifoBuffer.hxx"
@@ -36,13 +37,13 @@
 #include "Log.hxx"
 #include "LogBackend.hxx"
 
+#include "win32/unistd.hxx"
+
 #include <cassert>
 #include <cstddef>
 #include <cstdio>
 #include <cstdlib>
 #include <stdexcept>
-
-#include <unistd.h>
 
 struct CommandLine {
 	AudioFormat in_audio_format, out_audio_format;
@@ -71,7 +72,7 @@ ParseCommandLine(int argc, char **argv)
 	while (auto o = option_parser.Next()) {
 		switch (Option(o.index)) {
 		case OPTION_CONFIG:
-			c.config_path = Path::FromFS(o.value);
+			c.config_path = Path::FromFS(PathFromUTF8(o.value).c_str());
 			break;
 
 		case OPTION_VERBOSE:
@@ -119,7 +120,7 @@ try {
 			const auto dest = buffer.Write();
 			assert(!dest.empty());
 
-			ssize_t nbytes = read(0, dest.data, dest.size);
+			size_t nbytes = std::fread(dest.data, dest.size, 0, stdin);
 			if (nbytes <= 0)
 				break;
 
@@ -137,8 +138,7 @@ try {
 
 		auto output = state.Convert({src.data, src.size});
 
-		[[maybe_unused]] ssize_t ignored = write(1, output.data,
-						   output.size);
+		[[maybe_unused]] size_t ignored = std::fwrite(output.data, output.size, 1, stdout);
 	}
 
 	while (true) {
@@ -146,8 +146,7 @@ try {
 		if (output.IsNull())
 			break;
 
-		[[maybe_unused]] ssize_t ignored = write(1, output.data,
-						   output.size);
+		[[maybe_unused]] size_t ignored = fwrite(output.data, output.size, 1, stdout);
 	}
 
 	return EXIT_SUCCESS;

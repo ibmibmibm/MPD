@@ -23,6 +23,7 @@
 #include "thread/Cond.hxx"
 #include "event/Loop.hxx"
 
+#include <algorithm>
 #include <cassert>
 #include <cstring>
 #include <stdexcept>

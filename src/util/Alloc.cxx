@@ -21,15 +21,18 @@
 #include "Alloc.hxx"
 #include "ConcatString.hxx"
 
+#include "win32/unistd.hxx"
 #include <cstring>
-
-#include <unistd.h>
 
 [[noreturn]]
 static void
 oom()
 {
+#ifndef _WIN32
 	(void)write(STDERR_FILENO, "Out of memory\n", 14);
+#else
+	(void)_write(2, "Out of memory\n", 14);
+#endif
 	std::_Exit(1);
 }
 

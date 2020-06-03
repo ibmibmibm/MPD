@@ -31,11 +31,10 @@
 #define ASCII_HXX
 
 #include "Compiler.h"
+#include "Strings.hxx"
 
 #include <cassert>
 #include <string_view>
-
-#include <strings.h>
 
 /**
  * Determine whether two strings are equal, ignoring case for ASCII

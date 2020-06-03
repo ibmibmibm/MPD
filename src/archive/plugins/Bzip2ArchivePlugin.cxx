@@ -40,7 +40,7 @@ class Bzip2ArchiveFile final : public ArchiveFile {
 
 public:
 	Bzip2ArchiveFile(Path path, InputStreamPtr &&_is)
-		:name(path.GetBase().c_str()),
+		:name(path.GetBase().ToUTF8()),
 		 istream(std::move(_is)) {
 		// remove .bz2 suffix
 		const size_t len = name.length();

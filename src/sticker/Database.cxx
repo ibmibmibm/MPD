@@ -82,7 +82,7 @@ static const char sticker_sql_create[] =
 	"";
 
 StickerDatabase::StickerDatabase(Path path)
-	:db(path.c_str())
+	:db(path.ToUTF8().c_str())
 {
 	assert(!path.IsNull());
 

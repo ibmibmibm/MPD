@@ -22,21 +22,17 @@
 
 #include "output/Features.h"
 
-#ifdef ENABLE_WINMM_OUTPUT
-
 #include "util/Compiler.h"
 
 #include <windows.h>
 #include <mmsystem.h>
 
-struct WinmmOutput;
+class WinmmOutput;
 
 extern const struct AudioOutputPlugin winmm_output_plugin;
 
 gcc_pure
 HWAVEOUT
 winmm_output_get_handle(WinmmOutput &output);
-
-#endif
 
 #endif

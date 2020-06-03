@@ -70,6 +70,12 @@ enum TagType
  * An array of strings, which map the #TagType to its machine
  * readable name (specific to the MPD protocol).
  */
+#ifdef __cplusplus
+extern "C" {
+#endif
 extern const char *const tag_item_names[];
+#ifdef __cplusplus
+}
+#endif
 
 #endif

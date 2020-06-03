@@ -30,12 +30,10 @@
 #include "Util.hxx"
 #include "system/Error.hxx"
 
+#include "win32/unistd.hxx"
 #ifdef __linux__
 #include <sched.h>
 #include <sys/syscall.h>
-#include <unistd.h>
-#elif defined(_WIN32)
-#include <windows.h>
 #endif
 
 #ifdef __linux__

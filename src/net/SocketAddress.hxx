@@ -52,7 +52,7 @@ class IPv4Address;
 class SocketAddress {
 public:
 #ifdef _WIN32
-	typedef int size_type;
+	typedef socklen_t size_type;
 #else
 	typedef socklen_t size_type;
 #endif

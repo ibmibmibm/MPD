@@ -36,21 +36,21 @@ TestPcmMix(G g=G())
 	/* portion1=1.0: result must be equal to src1 */
 	auto result = src1;
 	bool success = pcm_mix(dither,
-			       result.begin(), src2.begin(), sizeof(result),
+			       result.data(), src2.data(), sizeof(result),
 			       format, 1.0);
 	ASSERT_TRUE(success);
 	AssertEqualWithTolerance(result, src1, 3);
 
 	/* portion1=0.0: result must be equal to src2 */
 	result = src1;
-	success = pcm_mix(dither, result.begin(), src2.begin(), sizeof(result),
+	success = pcm_mix(dither, result.data(), src2.data(), sizeof(result),
 			  format, 0.0);
 	ASSERT_TRUE(success);
 	AssertEqualWithTolerance(result, src2, 3);
 
 	/* portion1=0.5 */
 	result = src1;
-	success = pcm_mix(dither, result.begin(), src2.begin(), sizeof(result),
+	success = pcm_mix(dither, result.data(), src2.data(), sizeof(result),
 			  format, 0.5);
 	ASSERT_TRUE(success);
 

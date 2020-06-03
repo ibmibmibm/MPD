@@ -34,16 +34,11 @@
 
 #include <utility>
 
-#include <unistd.h>
-#include <sys/types.h>
-
 #ifdef __linux__
 #include <csignal>
 #endif
 
-#ifdef _WIN32
-#include <cwchar>
-#endif
+#include "win32/unistd.hxx"
 
 /**
  * An OO wrapper for a UNIX file descriptor.

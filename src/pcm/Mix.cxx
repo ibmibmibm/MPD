@@ -26,6 +26,7 @@
 
 #include "Dither.cxx" // including the .cxx file to get inlined templates
 
+#include <cmath>
 #include <cassert>
 #include <cmath>
 

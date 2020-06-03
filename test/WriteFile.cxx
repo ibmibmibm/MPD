@@ -21,27 +21,26 @@
 #include "fs/NarrowPath.hxx"
 #include "util/PrintException.hxx"
 
+#include "win32/unistd.hxx"
 #include <cerrno>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 
-#include <unistd.h>
-
 static bool
-Copy(OutputStream &dest, int src)
+Copy(OutputStream &dest, std::FILE *src)
 {
 	while (true) {
 		uint8_t buffer[8192];
-		ssize_t nbytes = read(src, buffer, sizeof(buffer));
-		if (nbytes < 0) {
-			std::fprintf(stderr, "Failed to read from stdin: %s\n",
-				std::strerror(errno));
-			return false;
-		}
-
-		if (nbytes == 0)
+		auto nbytes = std::fread(buffer, sizeof(buffer), 1, src);
+		if (nbytes == 0) {
+			if (std::ferror(src)) {
+				std::fprintf(stderr, "Failed to read from stdin: %s\n",
+					std::strerror(errno));
+				return false;
+			}
 			return true;
+		}
 
 		dest.Write(buffer, nbytes);
 	}
@@ -59,7 +58,7 @@ try {
 
 	FileOutputStream fos(path);
 
-	if (!Copy(fos, STDIN_FILENO))
+	if (!Copy(fos, stdin))
 		return EXIT_FAILURE;
 
 	fos.Commit();

@@ -34,12 +34,12 @@
 #include "Log.hxx"
 #include "LogBackend.hxx"
 
+#include "win32/unistd.hxx"
+
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>
 #include <stdexcept>
-
-#include <unistd.h>
 
 struct CommandLine {
 	const char *decoder = nullptr;

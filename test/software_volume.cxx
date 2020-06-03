@@ -29,17 +29,17 @@
 #include "util/ConstBuffer.hxx"
 #include "util/PrintException.hxx"
 
+#include "win32/unistd.hxx"
+
 #include <cstddef>
 #include <cstdio>
 #include <cstdlib>
-
-#include <unistd.h>
 
 int
 main(int argc, char **argv)
 try {
 	static char buffer[4096];
-	ssize_t nbytes;
+	size_t nbytes;
 
 	if (argc > 2) {
 		std::fprintf(stderr, "Usage: software_volume [FORMAT] <IN >OUT\n");
@@ -57,9 +57,9 @@ try {
 		std::fprintf(stderr, "Converting to %s\n",
 			sample_format_to_string(out_sample_format));
 
-	while ((nbytes = read(0, buffer, sizeof(buffer))) > 0) {
+	while ((nbytes = std::fread(buffer, sizeof(buffer), 1, stdin)) > 0) {
 		auto dest = pv.Apply({buffer, size_t(nbytes)});
-		[[maybe_unused]] ssize_t ignored = write(1, dest.data, dest.size);
+		[[maybe_unused]] size_t ignored = fwrite(dest.data, dest.size, 1, stdout);
 	}
 
 	pv.Close();

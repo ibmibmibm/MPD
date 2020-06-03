@@ -28,19 +28,19 @@
 #include "pcm/AudioFormat.hxx"
 #include "util/PrintException.hxx"
 
+#include "win32/unistd.hxx"
+
 #include <cstddef>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <stdexcept>
 
-#include <unistd.h>
-
 int main(int argc, char **argv)
 try {
 	struct Compressor *compressor;
 	static char buffer[4096];
-	ssize_t nbytes;
+	size_t nbytes;
 
 	if (argc > 2) {
 		std::fprintf(stderr, "Usage: run_normalize [FORMAT] <IN >OUT\n");
@@ -53,11 +53,11 @@ try {
 
 	compressor = Compressor_new(0);
 
-	while ((nbytes = read(0, buffer, sizeof(buffer))) > 0) {
+	while ((nbytes = std::fread(buffer, sizeof(buffer), 1, stdin)) > 0) {
 		Compressor_Process_int16(compressor,
 					 (int16_t *)buffer, nbytes / 2);
 
-		[[maybe_unused]] ssize_t ignored = write(1, buffer, nbytes);
+		[[maybe_unused]] size_t ignored = fwrite(buffer, nbytes, 1, stdout);
 	}
 
 	Compressor_delete(compressor);

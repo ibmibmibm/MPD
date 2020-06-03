@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2019 Max Kellermann <max.kellermann@gmail.com>
+ * Copyright 2010-2019 Max Kellermann <max.kellermann@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,45 +27,19 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FILE_TIME_HXX
-#define FILE_TIME_HXX
+#ifndef STRINGS_HXX
+#define STRINGS_HXX
 
-#include <windows.h>
-#include <fileapi.h>
-
-#include <chrono>
-#include <cstdint>
-#include <ctime>
-
-constexpr uint64_t
-ConstructUint64(DWORD lo, DWORD hi) noexcept
-{
-	return uint64_t(lo) | (uint64_t(hi) << 32);
+#if !defined(_WIN32) || defined(__MINGW32__)
+#	include <strings.h>
+#else
+#	include <cstring>
+static inline int strcasecmp(const char *s1, const char *s2) noexcept {
+	return _stricmp(s1, s2);
 }
 
-constexpr uint64_t
-ToUint64(FILETIME ft) noexcept
-{
-	return ConstructUint64(ft.dwLowDateTime, ft.dwHighDateTime);
+static inline int strncasecmp(const char *s1, const char *s2, size_t n) noexcept {
+	return _strnicmp(s1, s2, n);
 }
-
-constexpr std::time_t
-FileTimeToTimeT(FILETIME ft) noexcept
-{
-	return (ToUint64(ft) - 116444736000000000) / 10000000;
-}
-
-inline std::chrono::system_clock::time_point
-FileTimeToChrono(FILETIME ft) noexcept
-{
-	// TODO: eliminate the std::time_t roundtrip, preserve sub-second resolution
-	return std::chrono::system_clock::from_time_t(FileTimeToTimeT(ft));
-}
-
-constexpr std::chrono::seconds
-DeltaFileTimeS(FILETIME a, FILETIME b) noexcept
-{
-	return std::chrono::seconds((ToUint64(a) - ToUint64(b)) / 10000000);
-}
-
+#endif
 #endif

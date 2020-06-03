@@ -26,4 +26,6 @@ class InputStream;
 
 typedef std::unique_ptr<InputStream> InputStreamPtr;
 
+#include "InputStream.hxx"
+
 #endif

@@ -34,6 +34,8 @@
 #include "util/StringView.hxx"
 #include "util/PrintException.hxx"
 
+#include "win32/unistd.hxx"
+
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>
@@ -41,8 +43,6 @@
 #ifdef HAVE_CLOCALE
 #include <clocale>
 #endif
-
-#include <unistd.h>
 
 class DumpTagHandler final : public NullTagHandler {
 	bool empty = true;

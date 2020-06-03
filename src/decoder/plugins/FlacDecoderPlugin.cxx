@@ -23,6 +23,7 @@
 #include "FlacCommon.hxx"
 #include "lib/xiph/FlacMetadataChain.hxx"
 #include "OggCodec.hxx"
+#include "input/LocalOpen.hxx"
 #include "input/InputStream.hxx"
 #include "fs/Path.hxx"
 #include "fs/NarrowPath.hxx"
@@ -72,7 +73,17 @@ static bool
 flac_scan_file(Path path_fs, TagHandler &handler) noexcept
 {
 	FlacMetadataChain chain;
-	if (!chain.Read(NarrowPath(path_fs))) {
+	bool success;
+#ifdef _WIN32
+	{
+		Mutex mutex;
+		InputStreamPtr file = OpenLocalInputStream(path_fs, mutex);
+		success = chain.Read(*file);
+	}
+#else
+	success = chain.Read(NarrowPath(path_fs));
+#endif
+	if (!success) {
 		FormatDebug(flac_domain,
 			    "Failed to read FLAC tags: %s",
 			    chain.GetStatusString());

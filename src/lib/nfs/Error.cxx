@@ -32,6 +32,7 @@
 
 #include "Error.hxx"
 #include "util/StringFormat.hxx"
+#include "win32/unistd.hxx"
 
 extern "C" {
 #include <nfsc/libnfs.h>

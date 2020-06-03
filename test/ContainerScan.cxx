@@ -29,12 +29,12 @@
 #include "util/PrintException.hxx"
 #include "util/UriExtract.hxx"
 
+#include "win32/unistd.hxx"
+
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>
 #include <stdexcept>
-
-#include <unistd.h>
 
 static const DecoderPlugin *
 FindContainerDecoderPlugin(const char *suffix)

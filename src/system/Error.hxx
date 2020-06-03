@@ -32,7 +32,9 @@
 
 #include "util/Compiler.h"
 
+#include <cassert>
 #include <cstdio>
+#include <memory>
 #include <system_error>
 #include <utility>
 
@@ -41,52 +43,91 @@ static inline std::system_error
 FormatSystemError(std::error_code code, const char *fmt,
 		  Args&&... args) noexcept
 {
-	char buffer[1024];
-	std::snprintf(buffer, sizeof(buffer), fmt, std::forward<Args>(args)...);
-	return std::system_error(code, buffer);
+	const int size = std::snprintf(nullptr, 0, fmt, std::forward<Args>(args)...);
+	assert(size >= 0);
+	auto buffer = std::make_unique<char[]>(size + 1);
+	std::sprintf(buffer.get(), fmt, std::forward<Args>(args)...);
+	return std::system_error(code, std::string(buffer.get(), size));\
 }
 
 #ifdef _WIN32
+#	include <windows.h>
 
-#include <windows.h>
+#	ifdef __MINGW32__
+static inline const std::error_category &windows_category() noexcept {
+	return std::system_category();
+}
+#	else
+static inline const std::error_category &windows_category() noexcept;
+class WindowsCategory : public std::_System_error_category {
+public:
+	std::string message(int code) const override {
+		char buffer[512];
+		size_t size = 0;
+		{
+			wchar_t w_msg[512];
+			DWORD w_msg_size =
+				FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM |
+						       FORMAT_MESSAGE_IGNORE_INSERTS,
+					       nullptr, code, 0, w_msg, 512, nullptr);
 
-static inline std::system_error
-MakeLastError(DWORD code, const char *msg) noexcept
-{
-	return std::system_error(std::error_code(code, std::system_category()),
-				 msg);
+			while (w_msg_size > 0) {
+				switch (w_msg[w_msg_size - 1]) {
+				case '\0':
+				case '\t':
+				case '\r':
+				case '\n':
+					--w_msg_size;
+					continue;
+				default:
+					break;
+				}
+			}
+
+			if (w_msg_size > 0) {
+				int len = WideCharToMultiByte(CP_UTF8, 0, w_msg,
+							      w_msg_size, buffer, 512 - 1,
+							      nullptr, nullptr);
+				if (len > 0) {
+					size = len;
+				}
+			}
+		}
+		return std::string(buffer, size);
+	}
+	std::error_condition default_error_condition(int code) const noexcept override {
+		return std::error_condition(code, windows_category());
+	}
+};
+static inline const std::error_category &windows_category() noexcept {
+	static const WindowsCategory windows_category_instance{};
+	return windows_category_instance;
+}
+#	endif
+
+static inline std::system_error MakeLastError(DWORD code, std::string msg) noexcept {
+	return std::system_error(std::error_code(code, windows_category()),
+				 std::move(msg));
 }
 
-static inline std::system_error
-MakeLastError(const char *msg) noexcept
-{
-	return MakeLastError(GetLastError(), msg);
+static inline std::system_error MakeLastError(std::string msg) noexcept {
+	return MakeLastError(GetLastError(), std::move(msg));
 }
 
-template<typename... Args>
-static inline std::system_error
-FormatLastError(DWORD code, const char *fmt, Args&&... args) noexcept
-{
-	char buffer[512];
-	const auto end = buffer + sizeof(buffer);
-	size_t length = std::snprintf(buffer, sizeof(buffer) - 128,
-				 fmt, std::forward<Args>(args)...);
-	char *p = buffer + length;
-	*p++ = ':';
-	*p++ = ' ';
-
-	FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM |
-		       FORMAT_MESSAGE_IGNORE_INSERTS,
-		       nullptr, code, 0, p, end - p, nullptr);
-	return MakeLastError(code, buffer);
+template <typename... Args>
+static inline std::system_error FormatLastError(DWORD code, const char *fmt,
+						Args &&... args) noexcept {
+	const int size = std::snprintf(nullptr, 0, fmt, std::forward<Args>(args)...);
+	assert(size >= 0);
+	auto buffer = std::make_unique<char[]>(size + 1);
+	std::sprintf(buffer.get(), fmt, std::forward<Args>(args)...);
+	return MakeLastError(code, std::string(buffer.get(), size));
 }
 
-template<typename... Args>
-static inline std::system_error
-FormatLastError(const char *fmt, Args&&... args) noexcept
-{
-	return FormatLastError(GetLastError(), fmt,
-			       std::forward<Args>(args)...);
+template <typename... Args>
+static inline std::system_error FormatLastError(const char *fmt,
+						Args &&... args) noexcept {
+	return FormatLastError(GetLastError(), fmt, std::forward<Args>(args)...);
 }
 
 #endif /* _WIN32 */

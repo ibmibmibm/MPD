@@ -27,6 +27,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "net/Init.hxx"
 #include "net/IPv4Address.hxx"
 #include "net/ToString.hxx"
 
@@ -63,6 +64,7 @@ TEST(IPv4Address, Octets)
 
 TEST(IPv4Address, Any)
 {
+	const ScopeNetInit net_init;
 	EXPECT_EQ(ToString(IPv4Address(1234).GetAddress()), "0.0.0.0");
 	EXPECT_EQ(ToString(IPv4Address(1234)), "0.0.0.0:1234");
 }
@@ -77,7 +79,7 @@ TEST(IPv4Address, Port)
 
 TEST(IPv4Address, Loopback)
 {
-	static constexpr auto a = IPv4Address(IPv4Address::Loopback(), 1234);
+	static auto a = IPv4Address(IPv4Address::Loopback(), 1234);
 	EXPECT_EQ(ToString(a.GetAddress()), "127.0.0.1");
 }
 

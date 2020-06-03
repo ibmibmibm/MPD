@@ -27,7 +27,7 @@
 #include "storage/FileInfo.hxx"
 #include "Log.hxx"
 
-#include <unistd.h>
+#include "win32/unistd.hxx"
 
 inline void
 UpdateWalk::UpdateSongFile2(Directory &directory,

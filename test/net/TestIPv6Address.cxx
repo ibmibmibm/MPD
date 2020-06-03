@@ -27,6 +27,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "net/Init.hxx"
 #include "net/IPv6Address.hxx"
 #include "net/ToString.hxx"
 
@@ -65,6 +66,7 @@ TEST(IPv6Address, Octets)
 
 TEST(IPv6Address, Any)
 {
+	const ScopeNetInit net_init;
 	EXPECT_EQ(ToString(IPv6Address(1234).GetAddress()), "::");
 	EXPECT_EQ(ToString(IPv6Address(1234)), "[::]:1234");
 }

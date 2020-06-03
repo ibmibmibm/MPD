@@ -57,7 +57,7 @@ public:
 	static constexpr unsigned ERROR = PollGroup::ERROR;
 	static constexpr unsigned HANGUP = PollGroup::HANGUP;
 
-	typedef std::make_signed<size_t>::type ssize_t;
+	using ssize_t = std::make_signed<size_t>::type;
 
 	explicit SocketMonitor(EventLoop &_loop) noexcept
 		:loop(_loop) {}

@@ -24,6 +24,7 @@
 #include "../InputStream.hxx"
 #include "fs/LookupFile.hxx"
 #include "fs/Path.hxx"
+#include "fs/Charset.hxx"
 #include "Log.hxx"
 
 InputStreamPtr
@@ -39,20 +40,20 @@ OpenArchiveInputStream(Path path, Mutex &mutex)
 		}
 	} catch (...) {
 		LogFormat(LogLevel::DEBUG, std::current_exception(),
-			  "not an archive, lookup %s failed", path.c_str());
+			  "not an archive, lookup %s failed", path.ToUTF8().c_str());
 		return nullptr;
 	}
 
-	const char *suffix = l.archive.GetSuffix();
-	if (suffix == nullptr)
+	const std::string suffix = ::PathToUTF8(l.archive.GetSuffix());
+	if (suffix.empty())
 		return nullptr;
 
 	//check which archive plugin to use (by ext)
-	arplug = archive_plugin_from_suffix(suffix);
+	arplug = archive_plugin_from_suffix(suffix.c_str());
 	if (!arplug) {
 		return nullptr;
 	}
 
 	return archive_file_open(arplug, l.archive)
-		->OpenStream(l.inside.c_str(), mutex);
+		->OpenStream(l.inside.ToUTF8().c_str(), mutex);
 }
