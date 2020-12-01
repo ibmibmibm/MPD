@@ -449,3 +449,14 @@ boost = BoostProject(
     'fc9f85fc030e233142908241af7a846e60630aa7388de9a5fafb1f3a26840854',
     'include/boost/version.hpp',
 )
+
+libsamplerate = AutotoolsProject(
+    'https://github.com/libsndfile/libsamplerate/releases/download/0.2.2/libsamplerate-0.2.2.tar.xz',
+    '3258da280511d24b49d6b08615bbe824d0cacc9842b0e4caf11c52cf2b043893',
+    'lib/libsamplerate.a',
+    [
+        '--disable-shared', '--enable-static',
+        '--disable-sndfile',
+    ],
+    base='libsamplerate-0.2.2',
+)
