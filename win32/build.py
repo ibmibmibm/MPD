@@ -112,6 +112,7 @@ thirdparty_libs = [
     boost,
     libsamplerate,
     libpcre,
+    sqlite3,
 ]
 
 # build the third-party libraries

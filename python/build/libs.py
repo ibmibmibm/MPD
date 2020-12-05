@@ -487,3 +487,18 @@ libpcre = AutotoolsProject(
         '--enable-newline-is-anycrlf',
     ],
 )
+
+sqlite3 = AutotoolsProject(
+    'https://www.sqlite.org/2021/sqlite-autoconf-3350500.tar.gz',
+    'f52b72a5c319c3e516ed7a92e123139a6e87af08a2dc43d7757724f6132e6db0',
+    'lib/libsqlite3.a',
+    [
+        '--disable-shared', '--enable-static',
+        '--enable-fts3=no',
+        '--enable-fts4=no',
+        '--enable-fts5=no',
+        '--enable-json1=no',
+        '--enable-rtree=no',
+        '--enable-session=no',
+    ],
+)
