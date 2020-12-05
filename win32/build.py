@@ -111,6 +111,7 @@ thirdparty_libs = [
     jack,
     boost,
     libsamplerate,
+    libpcre,
 ]
 
 # build the third-party libraries
