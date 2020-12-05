@@ -108,6 +108,7 @@ thirdparty_libs = [
     jack,
     boost,
     libsamplerate,
+    sqlite3,
 ]
 
 # build the third-party libraries

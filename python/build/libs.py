@@ -460,3 +460,18 @@ libsamplerate = AutotoolsProject(
     ],
     base='libsamplerate-0.2.2',
 )
+
+sqlite3 = AutotoolsProject(
+    'https://www.sqlite.org/2021/sqlite-autoconf-3370000.tar.gz',
+    '731a4651d4d4b36fc7d21db586b2de4dd00af31fd54fb5a9a4b7f492057479f7',
+    'lib/libsqlite3.a',
+    [
+        '--disable-shared', '--enable-static',
+        '--enable-fts3=no',
+        '--enable-fts4=no',
+        '--enable-fts5=no',
+        '--enable-json1=no',
+        '--enable-rtree=no',
+        '--enable-session=no',
+    ],
+)
