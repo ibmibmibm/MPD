@@ -385,6 +385,21 @@ openssl = OpenSSLProject(
     'include/openssl/ossl_typ.h',
 )
 
+libnghttp2 = AutotoolsProject(
+    'https://github.com/nghttp2/nghttp2/releases/download/v1.46.0/nghttp2-1.46.0.tar.xz',
+    '1a68cc4a5732afb735baf50aaac3cb3a6771e49f744bd5db6c49ab5042f12a43',
+    'lib/libnghttp2.a',
+    [
+        '--disable-shared', '--enable-static',
+        '--disable-examples', '--disable-python-bindings',
+        '--enable-lib-only',
+    ],
+
+    edits={
+        'lib/includes/nghttp2/nghttp2.h': lambda data: data.replace('#ifdef NGHTTP2_STATICLIB\n', '#define NGHTTP2_STATICLIB\n#ifdef NGHTTP2_STATICLIB\n'),
+    }
+)
+
 curl = CmakeProject(
     'https://curl.se/download/curl-7.79.1.tar.xz',
     '0606f74b1182ab732a17c11613cbbaf7084f2e6cca432642d0e3ad7c224c3689',
@@ -413,6 +428,7 @@ curl = CmakeProject(
         '-DCURL_WINDOWS_SSPI=OFF',
         '-DCURL_DISABLE_NTLM=ON',
         '-DBUILD_TESTING=OFF',
+        '-DUSE_NGHTTP2=ON',
     ],
     windows_configure_args=[
         '-DCMAKE_USE_SCHANNEL=ON',

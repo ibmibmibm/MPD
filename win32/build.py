@@ -103,6 +103,7 @@ thirdparty_libs = [
     wildmidi,
     gme,
     ffmpeg,
+    libnghttp2,
     curl,
     libnfs,
     jack,
