@@ -393,6 +393,17 @@ openssl = OpenSSLProject(
     'include/openssl/ossl_typ.h',
 )
 
+libnghttp2 = AutotoolsProject(
+    'https://github.com/nghttp2/nghttp2/releases/download/v1.43.0/nghttp2-1.43.0.tar.xz',
+    'f7d54fa6f8aed29f695ca44612136fa2359013547394d5dffeffca9e01a26b0f',
+    'lib/libnghttp2.a',
+    [
+        '--disable-shared', '--enable-static',
+        '--disable-examples', '--disable-python-bindings',
+        '--enable-lib-only',
+    ],
+)
+
 curl = AutotoolsProject(
     'https://curl.se/download/curl-7.76.1.tar.xz',
     '64bb5288c39f0840c07d077e30d9052e1cbb9fa6c2dc52523824cc859e679145',
@@ -423,6 +434,11 @@ curl = AutotoolsProject(
     ],
 
     patches='src/lib/curl/patches',
+
+    edits={
+        # this option is not understood by clang
+        'configure': lambda data: data.replace('PKGCONFIG --cflags-only-I libnghttp2', 'PKGCONFIG --cflags libnghttp2'),
+    }
 )
 
 libexpat = AutotoolsProject(
