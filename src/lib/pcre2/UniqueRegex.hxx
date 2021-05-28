@@ -30,48 +30,40 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef REGEX_POINTER_HXX
-#define REGEX_POINTER_HXX
+#ifndef UNIQUE_REGEX_HXX
+#define UNIQUE_REGEX_HXX
 
-#include "util/StringView.hxx"
-#include "util/Compiler.h"
+#include "RegexPointer.hxx"
+
+#include <utility>
 
 #include <pcre.h>
 
-#include <array>
-
-#if GCC_CHECK_VERSION(11,0)
-#pragma GCC diagnostic push
-/* bogus GCC 11 warning "ovector may be used uninitialized" in the
-   ovector.size() call */
-#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
-#endif
-
-class RegexPointer {
-protected:
-	pcre *re = nullptr;
-	pcre_extra *extra = nullptr;
-
-	unsigned n_capture = 0;
-
+class UniqueRegex : public RegexPointer {
 public:
-	constexpr bool IsDefined() const noexcept {
-		return re != nullptr;
+	UniqueRegex() = default;
+
+	UniqueRegex(const char *pattern, bool anchored, bool capture, bool caseless) {
+		Compile(pattern, anchored, capture, caseless);
 	}
 
-	gcc_pure
-	bool Match(StringView s) const noexcept {
-		/* we don't need the data written to ovector, but PCRE can
-		   omit internal allocations if we pass a buffer to
-		   pcre_exec() */
-		std::array<int, 16> ovector;
-		return pcre_exec(re, extra, s.data, s.size,
-				 0, 0, &ovector.front(), ovector.size()) >= 0;
+	UniqueRegex(UniqueRegex &&src) noexcept : RegexPointer(src) {
+		src.re = nullptr;
 	}
+
+	~UniqueRegex() noexcept { pcre2_code_free(re); }
+
+	UniqueRegex &operator=(UniqueRegex &&src) {
+		using std::swap;
+		swap<RegexPointer>(*this, src);
+		return *this;
+	}
+
+	/**
+	 * Throws std::runtime_error on error.
+	 */
+	void Compile(std::string_view pattern, bool anchored, bool capture,
+		     bool caseless);
 };
-
-#if GCC_CHECK_VERSION(11,0)
-#pragma GCC diagnostic pop
-#endif
 
 #endif

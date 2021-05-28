@@ -27,7 +27,7 @@ StringFilter::MatchWithoutNegation(const char *s) const noexcept
 {
 	assert(s != nullptr);
 
-#ifdef HAVE_PCRE
+#ifdef HAVE_PCRE2
 	if (regex)
 		return regex->Match(s);
 #endif

@@ -33,7 +33,6 @@
 #include "util/RuntimeError.hxx"
 #include "util/StringCompare.hxx"
 #include "util/StringStrip.hxx"
-#include "util/StringView.hxx"
 #include "util/ASCII.hxx"
 #include "util/UriUtil.hxx"
 
@@ -219,7 +218,7 @@ ParseStringFilter(const char *&s, bool fold_case)
 
 	bool negated = false;
 
-#ifdef HAVE_PCRE
+#ifdef HAVE_PCRE2
 	if ((s[0] == '!' || s[0] == '=') && s[1] == '~') {
 		negated = s[0] == '!';
 		s = StripLeft(s + 2);

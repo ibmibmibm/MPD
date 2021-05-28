@@ -30,49 +30,33 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef UNIQUE_REGEX_HXX
-#define UNIQUE_REGEX_HXX
+#include "UniqueRegex.hxx"
+#include "util/RuntimeError.hxx"
 
-#include "RegexPointer.hxx"
+void UniqueRegex::Compile(std::string_view pattern, bool anchored, bool capture,
+			  bool caseless) {
+	constexpr uint32_t default_options =
+		PCRE2_DOTALL | PCRE2_NO_AUTO_CAPTURE | PCRE2_UTF;
 
-#include <utility>
+	uint32_t options = default_options;
+	if (anchored)
+		options |= PCRE2_ANCHORED;
+	if (capture)
+		options &= ~PCRE2_NO_AUTO_CAPTURE;
+	if (caseless)
+		options |= PCRE2_CASELESS;
 
-#include <pcre.h>
-
-class UniqueRegex : public RegexPointer {
-public:
-	UniqueRegex() = default;
-
-	UniqueRegex(const char *pattern, bool anchored, bool capture,
-		    bool caseless) {
-		Compile(pattern, anchored, capture, caseless);
+	int error_code;
+	size_t error_offset;
+	re = pcre2_compile(reinterpret_cast<const uint8_t *>(pattern.data()),
+			   pattern.size(), options, &error_code, &error_offset, nullptr);
+	if (re == nullptr) {
+		unsigned char error_string[256];
+		pcre2_get_error_message(error_code, error_string, sizeof(error_string));
+		throw FormatRuntimeError("Error in regex at offset %d: %s", error_offset,
+					 error_string);
 	}
 
-	UniqueRegex(UniqueRegex &&src) noexcept:RegexPointer(src) {
-		src.re = nullptr;
-		src.extra = nullptr;
-	}
-
-	~UniqueRegex() noexcept {
-		pcre_free(re);
-#ifdef PCRE_CONFIG_JIT
-		pcre_free_study(extra);
-#else
-		pcre_free(extra);
-#endif
-	}
-
-	UniqueRegex &operator=(UniqueRegex &&src) {
-		using std::swap;
-		swap<RegexPointer>(*this, src);
-		return *this;
-	}
-
-	/**
-	 * Throws std::runtime_error on error.
-	 */
-	void Compile(const char *pattern, bool anchored, bool capture,
-		     bool caseless);
-};
-
-#endif
+	pcre2_jit_compile(re, PCRE2_JIT_COMPLETE);
+	pcre2_jit_free_unused_memory(nullptr);
+}

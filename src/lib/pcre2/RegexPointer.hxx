@@ -30,42 +30,34 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "UniqueRegex.hxx"
-#include "util/RuntimeError.hxx"
+#ifndef REGEX_POINTER_HXX
+#define REGEX_POINTER_HXX
 
-void
-UniqueRegex::Compile(const char *pattern, bool anchored, bool capture,
-		     bool caseless)
-{
-	constexpr int default_options = PCRE_DOTALL|PCRE_NO_AUTO_CAPTURE|PCRE_UTF8;
+#include "Log.hxx"
+#include "util/Compiler.h"
 
-	int options = default_options;
-	if (anchored)
-		options |= PCRE_ANCHORED;
-	if (capture)
-		options &= ~PCRE_NO_AUTO_CAPTURE;
-	if (caseless)
-		options |= PCRE_CASELESS;
+#define PCRE2_CODE_UNIT_WIDTH 8
+#include <pcre2.h>
 
-	const char *error_string;
-	int error_offset;
-	re = pcre_compile(pattern, options, &error_string, &error_offset, nullptr);
-	if (re == nullptr)
-		throw FormatRuntimeError("Error in regex at offset %d: %s",
-					 error_offset, error_string);
+#include <array>
+#include <stdexcept>
+#include <string_view>
 
-	int study_options = 0;
-#ifdef PCRE_CONFIG_JIT
-	study_options |= PCRE_STUDY_JIT_COMPILE;
-#endif
-	extra = pcre_study(re, study_options, &error_string);
-	if (extra == nullptr && error_string != nullptr) {
-		pcre_free(re);
-		re = nullptr;
-		throw FormatRuntimeError("Regex study error: %s", error_string);
+class RegexPointer {
+protected:
+	pcre2_code *re = nullptr;
+
+public:
+	constexpr bool IsDefined() const noexcept { return re != nullptr; }
+
+	gcc_pure bool Match(std::string_view s) const noexcept {
+		pcre2_match_data *match = pcre2_match_data_create(1, nullptr);
+		const auto result =
+			pcre2_match(re, reinterpret_cast<const uint8_t *>(s.data()),
+				    s.size(), 0, 0, match, nullptr);
+		pcre2_match_data_free(match);
+		return result >= 1;
 	}
+};
 
-	int n;
-	if (capture && pcre_fullinfo(re, extra, PCRE_INFO_CAPTURECOUNT, &n) == 0)
-		n_capture = n;
-}
+#endif

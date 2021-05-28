@@ -492,14 +492,13 @@ libsamplerate = AutotoolsProject(
     base='libsamplerate-0.2.1',
 )
 
-libpcre = AutotoolsProject(
-    'https://ftp.pcre.org/pub/pcre/pcre-8.44.tar.bz2',
-    '19108658b23b3ec5058edc9f66ac545ea19f9537234be1ec62b714c84399366d',
-    'lib/libpcre.a',
+libpcre2 = AutotoolsProject(
+    'https://ftp.pcre.org/pub/pcre/pcre2-10.37.tar.bz2',
+    '4d95a96e8b80529893b4562be12648d798b957b1ba1aae39606bbc2ab956d270',
+    'lib/libpcre2-8.a',
     [
         '--disable-shared', '--enable-static',
         '--enable-jit',
-        '--enable-unicode-properties',
         '--enable-newline-is-anycrlf',
     ],
 )

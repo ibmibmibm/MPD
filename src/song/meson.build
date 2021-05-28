@@ -14,7 +14,7 @@ song = static_library(
   'LightSong.cxx',
   include_directories: inc,
   dependencies: [
-    pcre_dep,
+    pcre2_dep,
   ],
 )
 
@@ -22,7 +22,7 @@ song_dep = declare_dependency(
   link_with: song,
   dependencies: [
     icu_dep,
-    pcre_dep,
+    pcre2_dep,
     tag_dep,
     time_dep,
     util_dep,

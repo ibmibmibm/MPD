@@ -24,8 +24,8 @@
 #include "util/Compiler.h"
 #include "config.h"
 
-#ifdef HAVE_PCRE
-#include "lib/pcre/UniqueRegex.hxx"
+#ifdef HAVE_PCRE2
+#include "lib/pcre2/UniqueRegex.hxx"
 #endif
 
 #include <string>
@@ -39,7 +39,7 @@ class StringFilter {
 	 */
 	IcuCompare fold_case;
 
-#ifdef HAVE_PCRE
+#ifdef HAVE_PCRE2
 	std::shared_ptr<UniqueRegex> regex;
 #endif
 
@@ -64,14 +64,14 @@ public:
 	}
 
 	bool IsRegex() const noexcept {
-#ifdef HAVE_PCRE
+#ifdef HAVE_PCRE2
 		return !!regex;
 #else
 		return false;
 #endif
 	}
 
-#ifdef HAVE_PCRE
+#ifdef HAVE_PCRE2
 	template<typename R>
 	void SetRegex(R &&_regex) noexcept {
 		regex = std::forward<R>(_regex);

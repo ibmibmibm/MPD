@@ -70,7 +70,7 @@ For example, the following installs a fairly complete list of build dependencies
 
     apt install meson g++ \
       libfmt-dev \
-      libpcre3-dev \
+      libpcre2-dev \
       libmad0-dev libmpg123-dev libid3tag0-dev \
       libflac-dev libvorbis-dev libopus-dev libogg-dev \
       libadplug-dev libaudiofile-dev libsndfile1-dev libfaad-dev \
