@@ -477,6 +477,17 @@ libsamplerate = AutotoolsProject(
     base='libsamplerate-0.2.2',
 )
 
+libpcre2 = AutotoolsProject(
+    'https://github.com/PhilipHazel/pcre2/releases/download/pcre2-10.39/pcre2-10.39.tar.bz2',
+    '0f03caf57f81d9ff362ac28cd389c055ec2bf0678d277349a1a4bee00ad6d440',
+    'lib/libpcre2-8.a',
+    [
+        '--disable-shared', '--enable-static',
+        '--enable-jit',
+        '--enable-newline-is-anycrlf',
+    ],
+)
+
 sqlite3 = AutotoolsProject(
     'https://www.sqlite.org/2021/sqlite-autoconf-3370000.tar.gz',
     '731a4651d4d4b36fc7d21db586b2de4dd00af31fd54fb5a9a4b7f492057479f7',

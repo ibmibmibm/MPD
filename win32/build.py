@@ -109,6 +109,7 @@ thirdparty_libs = [
     jack,
     boost,
     libsamplerate,
+    libpcre2,
     sqlite3,
     fmt,
 ]
