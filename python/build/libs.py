@@ -491,3 +491,14 @@ sqlite3 = AutotoolsProject(
         '--enable-session=no',
     ],
 )
+
+fmt = CmakeProject(
+    'https://github.com/fmtlib/fmt/archive/refs/tags/8.0.1.tar.gz',
+    'b06ca3130158c625848f3fb7418f235155a4d389b2abc3a6245fb01cb0eb1e01',
+    'lib/libfmt.a',
+    [
+    ],
+    base='fmt-8.0.1',
+    name='fmt',
+    version='8.0.1',
+)
